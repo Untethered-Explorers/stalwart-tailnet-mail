@@ -14,6 +14,23 @@ The local part is what the installer calls a "mailbox name". There is no
 relation to Linux users: the human account exists even if no OS account has
 that name, and `adduser` does not create a mailbox.
 
+### Mail accounts are not Linux accounts
+
+Do not create a Linux user for each mailbox. The two are independent:
+
+- `alice@<domain>` lives entirely inside Stalwart. No OS account is needed to
+  receive mail, use webmail or connect an IMAP/SMTP client.
+- `adduser alice` creates no mailbox, and creating a mailbox creates no OS
+  account.
+- Mail data lives in `/var/lib/stalwart` and belongs to the `stalwart` service
+  user; a normal Linux account could not read it without root anyway.
+
+Only the administrator who runs and updates the server needs a Linux account,
+with SSH key authentication and `sudo`. Everyone else reaches mail from their
+own devices over the tailnet. If someone must run `tailmail.py` or a cron job
+**on the server**, give them a dedicated non-sudo Linux account and an app
+password — never their mailbox password.
+
 | Role | Purpose | Credentials |
 |---|---|---|
 | human | person, webmail + mail clients | account password |
@@ -23,16 +40,62 @@ that name, and `adduser` does not create a mailbox.
 ## Passwords and app passwords
 
 - **Account password** — used for IMAP/SMTP and webmail login. Changing it
-  signs out webmail sessions ("remember me" tokens) but leaves app passwords
-  working.
+  signs out webmail sessions and connected applications, but leaves app
+  passwords working.
 - **App password** — a secondary credential for one device or agent. Created
   in the webmail Account Manager (`/account`) or the admin console
-  (`/admin` → Directory → Accounts → Credentials). The server shows the secret
-  once.
+  (**Management → Directory → Accounts → Credentials**). The server shows the
+  secret once.
 
 Use an app password for every agent and every place a password is stored in a
 config file. Revoking one does not disturb the mailbox password or other
 devices.
+
+### Changing your own password
+
+Sign in at `https://<host>/account` (or the webmail, then **Account**), open
+**Credentials → Password**, and enter the current password and the new one. The
+same screen manages passkeys, two-factor authentication and app passwords.
+
+A password change signs out connected applications and webmail sessions; app
+passwords keep working. Update any mail client that stores the account
+password. Clients configured with an app password need no change.
+
+### Resetting a password as an administrator
+
+1. Sign in at `https://<host>/admin` as `admin@<domain>`.
+2. Open **Management → Directory → Accounts**, select the account and open its
+   **Credentials → Password** section.
+3. Set a new password and give it to the user over a safe channel.
+
+There is no email-based "forgot password" flow: the Account Manager requires
+the current password, so a locked-out user asks an administrator. If the
+administrator is locked out, use
+[recovery mode](04-operations.md#recovering-access).
+
+## Adding accounts after install
+
+Use the admin console, not the installer:
+
+1. Sign in at `https://<host>/admin` as `admin@<domain>`.
+2. Open **Management → Directory → Accounts → Create**.
+3. Choose a **User** account. `name` is the local part (`bob`); the login is
+   the full `bob@<domain>`.
+4. Set a display name and initial password, and leave the role as **User**
+   unless the person should manage the server. Add aliases or a quota if
+   needed.
+
+The user can change the initial password at `/account` after signing in. Agent
+accounts are created the same way; their app passwords are made under the
+account's credentials.
+
+To retire an account, delete it in the same list (its data is removed in the
+background). To suspend one without deleting it, open its **Permissions** and
+disable `authenticate`: sign-in stops, but mail keeps arriving. Back up first
+if the mailbox may still be needed.
+
+Do not re-run `setup-mail.sh` to add a user: it resets the existing human,
+agent and admin passwords and issues new agent app passwords.
 
 ## Giving an agent access
 
@@ -81,8 +144,8 @@ gets:
 - its own app password(s), one per host or tool
 - its own audit trail in Stalwart's logs
 
-Retiring an agent is `Disable`/delete the account or revoke its app passwords;
-mail already delivered stays.
+Retiring an agent is deleting the account, disabling its `authenticate`
+permission, or revoking its app passwords; mail already delivered stays.
 
 ## Reading mail as an agent
 

@@ -23,6 +23,7 @@ sanitized config.
 | Webmail login fails | username is not the full address | use `user@<host>.<tailnet>.ts.net` |
 | Webmail returns 404 on `/webmail/` | bundle still downloading or download failed | wait, then `journalctl -u stalwart \| grep -i resource`; trigger `Action/UpdateApps` |
 | `/admin` returns 302 | normal: redirect to login | open it in a browser |
+| `/admin` or `/account` returns 404 | WebUI bundle not downloaded (no GitHub egress) | `stalwart-cli create Action/UpdateApps`; check `journalctl -u stalwart \| grep -i resource` |
 | `501 You are not allowed to send from this address` | From is not an account address | send as the account, or add an alias |
 | `535 ... credentials invalid` | wrong password, or account password changed | verify in `/account`; use the app password in configs |
 | Client cannot connect from another node | ufw/ACL blocks the port | check `ufw status verbose` and tailnet grants |

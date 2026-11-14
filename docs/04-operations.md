@@ -8,7 +8,7 @@ sudo ./setup-mail.sh --check
 
 Checks: Stalwart active, no leftover mail daemons, listeners on the tailnet
 address, no wildcard binds, no 8080, TLS chain and hostname on 993/465/443,
-IMAP login, webmail HTTP 200.
+IMAP login, and HTTP 200 from webmail, `/admin` and `/account`.
 
 ## Logs
 
@@ -87,16 +87,28 @@ sudo /usr/local/sbin/mail-cert-renew              # same, in the foreground
 If the API key is lost, create a new one (`/admin` → account → API keys, or
 recovery mode) and write it to `/root/stalwart-api-key`.
 
+## Adding and removing accounts
+
+Accounts are managed in `/admin` under **Management → Directory → Accounts**.
+Creating a user, setting an initial password, adding an alias and suspending an
+account (by disabling `authenticate`) are all done there; see
+[03-accounts-and-agents.md](03-accounts-and-agents.md#adding-accounts-after-install).
+
+Do not re-run the installer to add a user: it rotates the passwords of the
+existing accounts. Mail users do not need Linux accounts on the host.
+
 ## Password changes
 
 | Account | How |
 |---|---|
-| your own | `https://<host>/account` → Password |
-| any account | `/admin` → Directory → Accounts → Credentials |
-| locked out | recovery mode, see below |
+| your own | `https://<host>/account` → **Credentials → Password** |
+| any account | `/admin` → **Management → Directory → Accounts** → **Credentials → Password** |
+| locked out | an administrator resets it; if the administrator is locked out, recovery mode, see below |
 
-After changing a password, update clients that use it. App passwords survive a
-password change; webmail sessions do not.
+There is no email-based "forgot password" flow: changing a password in the
+Account Manager requires the current one. After changing a password, update
+clients that use it. App passwords survive a password change; webmail sessions
+do not.
 
 ## Recovering access
 

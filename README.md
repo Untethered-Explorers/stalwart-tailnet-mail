@@ -47,7 +47,7 @@ See [docs/01-prerequisites.md](docs/01-prerequisites.md).
 | Admin | `https://<host>.<tailnet>.ts.net/admin` |
 | IMAP | 993, implicit TLS |
 | SMTP | 465 implicit TLS, 587 STARTTLS, 25 server-to-server |
-| Accounts | full email address is the username |
+| Accounts | full email address is the username; self-service at `/account` |
 | Agents | one account and one app password each |
 
 Credentials are written to `/root/mail-credentials.txt` (mode 0600).

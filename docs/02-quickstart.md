@@ -79,7 +79,7 @@ sudo ./setup-mail.sh --check
 ```
 
 It checks services, listeners, wildcard binds, TLS on 993/465/443, IMAP login
-as the human account, and the webmail endpoint.
+as the human account, and the webmail, admin and account pages.
 
 ## Unattended install
 

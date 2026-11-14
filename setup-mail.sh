@@ -766,6 +766,23 @@ verify() {
         [[ $code == 200 ]] && info "webmail HTTP 200" || { warn "webmail returned ${code:-nothing}"; fails=$((fails+1)); }
     fi
 
+    # The WebUI bundle downloads on first use, so give it a few tries.
+    local ui_code path attempt
+    for path in admin account; do
+        ui_code=""
+        for attempt in 1 2 3; do
+            ui_code="$(curl -sSL -o /dev/null -w '%{http_code}' --max-time 15 "https://$MAIL_HOST/$path" || true)"
+            [[ $ui_code == 200 ]] && break
+            if (( attempt < 3 )); then sleep 2; fi
+        done
+        case "$ui_code" in
+            200) info "$path HTTP 200" ;;
+            403) warn "$path returned 403 — check the HTTP access rules"; fails=$((fails+1)) ;;
+            404) warn "$path returned 404 — WebUI bundle missing; run: stalwart-cli create Action/UpdateApps"; fails=$((fails+1)) ;;
+            *)   warn "$path returned ${ui_code:-nothing}"; fails=$((fails+1)) ;;
+        esac
+    done
+
     local pw human_addr
     human_addr="$HUMAN_USER@$MAIL_DOMAIN"
     pw="${ACCOUNT_PW[$HUMAN_USER]:-}"

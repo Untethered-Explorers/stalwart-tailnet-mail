@@ -32,6 +32,28 @@ mail additionally needs MX, SPF, DKIM, DMARC and port 25 — a different project
 Stalwart supports multiple domains and aliases. The installer creates one. Add
 more in `/admin` → Domains, then attach addresses to accounts.
 
+**How do users change their passwords?**
+
+At `https://<host>/account` → **Credentials → Password**, entering the current
+password. A locked-out user cannot reset it by email; an administrator resets
+it in `/admin` → **Management → Directory → Accounts**. App passwords keep
+working across a password change.
+
+**How do I add another user?**
+
+In `/admin`, open **Management → Directory → Accounts → Create**, choose a
+**User** account, and give it a local part, the domain and an initial
+password. The new user signs in with the full address. Do not re-run the
+installer; it rotates the existing passwords. See
+[03-accounts-and-agents.md](03-accounts-and-agents.md#adding-accounts-after-install).
+
+**Do mail users need Linux accounts on the server?**
+
+No. Stalwart accounts are independent of OS users: creating a mailbox does not
+create a Linux user, and `adduser` does not create a mailbox. Only the
+administrator needs a Linux account; everyone else connects from their own
+devices over the tailnet.
+
 **Can agents use the webmail?**
 
 They can, but should not. Agents use SMTP/IMAP with their own app password.
