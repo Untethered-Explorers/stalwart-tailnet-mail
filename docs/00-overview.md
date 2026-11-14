@@ -87,6 +87,6 @@ Details: [01-prerequisites.md](01-prerequisites.md).
 setup-mail.sh              the installer
 mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
+scripts/tailmail.py        minimal SMTP/IMAP client for agents
 docs/                      these pages
-migrate/                   the OpenSMTPD+Dovecot → Stalwart migration record
 ```

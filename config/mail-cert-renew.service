@@ -1,8 +1,0 @@
-[Unit]
-Description=Renew the Tailscale HTTPS certificate used by mail services
-Documentation=file:///etc/default/mail-setup
-After=tailscaled.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/sbin/mail-cert-renew

@@ -1,6 +1,5 @@
 # Build artifacts
 dist/
-migrate/bin/
 
 # Python
 __pycache__/

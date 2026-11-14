@@ -1,6 +1,0 @@
-# PAM service used by Dovecot for IMAP/SMTP-IMAP logins.
-# Dovecot's `passdb pam {}` driver authenticates system accounts through this
-# file; Ubuntu's dovecot-core does not ship it, so logins fail without it.
-#%PAM-1.0
-@include common-auth
-@include common-account

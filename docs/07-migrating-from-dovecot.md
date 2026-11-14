@@ -78,10 +78,6 @@ sudo systemctl disable --now dovecot opensmtpd postfix
 Keep the old data for a week or two. Then remove the packages and the Maildirs
 after one final backup.
 
-If you migrated on the same host, the `migrate/` directory in this repository
-records the exact commands used for an OpenSMTPD + Dovecot → Stalwart move,
-including the rollback path.
-
 ## 5. Rollback plan
 
 The old stack is the rollback. Before removing it:
