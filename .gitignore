@@ -1,0 +1,12 @@
+# Build artifacts
+dist/
+migrate/bin/
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated Archify receipts (the HTML and the candidate are tracked)
+*.finalize.json
+*.finalize-summary.json
+*.delivery.json

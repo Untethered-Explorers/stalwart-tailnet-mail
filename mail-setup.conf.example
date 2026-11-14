@@ -1,0 +1,15 @@
+# Configuration for: sudo ./setup-mail.sh --config mail-setup.conf --yes
+#
+# Every value is optional. Blank means "detect or ask":
+#   MAIL_HOST   blank = this node's MagicDNS name from `tailscale status`
+#   MAIL_DOMAIN blank = MAIL_HOST
+#   HUMAN_USER  blank = the user running sudo
+#   AGENT_USERS blank = no agent accounts
+#
+# Keep the quotes. Values are sourced as shell variables.
+
+MAIL_HOST=""
+MAIL_DOMAIN=""
+HUMAN_USER=""
+AGENT_USERS=""
+WEBMAIL="yes"

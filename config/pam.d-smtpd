@@ -1,0 +1,7 @@
+# PAM service used by OpenSMTPD for SMTP AUTH (port 465/587 `auth` option).
+# OpenSMTPD calls pam_start("smtpd", ...) but the Debian/Ubuntu package does
+# not ship this file; without it every SMTP login fails with "Authentication
+# failed" even though the password is correct.
+#%PAM-1.0
+@include common-auth
+@include common-account
