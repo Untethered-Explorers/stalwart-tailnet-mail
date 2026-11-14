@@ -48,8 +48,10 @@ addresses: <user>@<host>.<tailnet>.ts.net
 This is what makes the certificate and the addresses line up with zero DNS
 work. You can pass `--domain` to use a different domain, but then the
 Tailscale certificate will not cover the addresses' domain and clients that
-verify names will complain. For a public domain, you need your own certificate
-and DNS; that is out of scope here.
+verify names will complain. The renewal timer also calls `tailscale cert` for
+the configured domain, so replace or disable it when you use a custom
+certificate. For a public domain, you need your own certificate and DNS; that is
+out of scope here.
 
 ## Firewall
 

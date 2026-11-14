@@ -21,6 +21,9 @@
 # Requirements: Debian/Ubuntu, root, Tailscale up with HTTPS certificates
 # enabled for the tailnet, ports 25/465/587/993/443 free.
 
+# SPDX-FileCopyrightText: 2026 McFuzzySquirrel
+# SPDX-License-Identifier: MIT
+
 set -Eeuo pipefail
 
 PROG="$(basename "$0")"

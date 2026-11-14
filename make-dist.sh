@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 McFuzzySquirrel
+# SPDX-License-Identifier: MIT
 #
 # make-dist.sh — build the hand-off tarball.
 #
@@ -17,19 +19,17 @@ STAGE="$HERE/dist/$NAME"
 OUT="$HERE/dist/$NAME.tar.gz"
 
 rm -rf "$STAGE"
-mkdir -p "$STAGE/docs" "$STAGE/scripts"
+mkdir -p "$STAGE/docs/adr" "$STAGE/docs/releases" "$STAGE/scripts"
 
-cp "$HERE/setup-mail.sh" "$STAGE/"
+cp "$HERE/setup-mail.sh" "$HERE/make-dist.sh" "$STAGE/"
 cp "$HERE/mail-setup.conf.example" "$STAGE/"
-cp "$HERE/READ-ME-FIRST.md" "$STAGE/"
+cp "$HERE/READ-ME-FIRST.md" "$HERE/README.md" "$HERE/CHANGELOG.md" \
+   "$HERE/LICENSE" "$HERE/THIRD-PARTY-NOTICES.md" "$STAGE/"
 cp "$HERE"/docs/*.md "$STAGE/docs/"
+cp "$HERE"/docs/adr/*.md "$STAGE/docs/adr/"
+cp "$HERE"/docs/releases/*.md "$STAGE/docs/releases/"
 cp "$HERE/scripts/tailmail.py" "$STAGE/scripts/"
-chmod +x "$STAGE/setup-mail.sh"
-
-# The HTML overview is generated separately; include it when present.
-if [[ -f "$HERE/docs/overview.html" ]]; then
-    cp "$HERE/docs/overview.html" "$STAGE/docs/"
-fi
+chmod +x "$STAGE/setup-mail.sh" "$STAGE/make-dist.sh"
 
 tar -czf "$OUT" -C "$HERE/dist" "$NAME"
 rm -rf "$STAGE"

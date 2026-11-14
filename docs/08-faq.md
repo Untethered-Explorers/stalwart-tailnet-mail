@@ -5,7 +5,7 @@
 Roundcube is fine software, but it is PHP plus a web server plus a database.
 Bulwark Lite is the same client as full Bulwark, served as static files by
 Stalwart, with no extra process and no CORS. If you specifically want Roundcube,
-nothing in the mail server prevents it — it speaks IMAP/SMTP like any client.
+nothing in the mail server prevents it. It speaks IMAP/SMTP like any client.
 
 **Why Bulwark Lite and not full Bulwark?**
 
@@ -25,7 +25,7 @@ MagicDNS name instead, and the weekly timer renews it.
 Yes, with caveats. Run the installer with `--domain example.com`. The Tailscale
 certificate will not cover `example.com`, so you need your own certificate
 installed as a `Certificate` object, and clients must resolve the name. Internet
-mail additionally needs MX, SPF, DKIM, DMARC and port 25 — a different project.
+mail additionally needs MX, SPF, DKIM, DMARC and port 25. That is a different project.
 
 **Can I have more than one domain?**
 
