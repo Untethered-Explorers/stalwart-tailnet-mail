@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-FileCopyrightText: 2026 McFuzzySquirrel
+# SPDX-License-Identifier: MIT
 """Minimal IMAP/SMTP client for the private tailnet mail server.
 
 Standard library only, TLS verified against the system CA store, so the
@@ -7,10 +9,10 @@ Tailscale-issued certificate validates without any special flags.
 Configuration is read from ~/.config/tailmail/config (INI) or the environment:
 
     [default]
-    host = mcsquirrel.tailc7d454.ts.net
-    username = agent-bot
+    host = <host>.<tailnet>.ts.net
+    username = agent-bot@<host>.<tailnet>.ts.net
     password = <secret>
-    from = agent-bot@mcsquirrel.tailc7d454.ts.net
+    from = agent-bot@<host>.<tailnet>.ts.net
 
 Environment overrides: TAILMAIL_HOST, TAILMAIL_USER, TAILMAIL_PASSWORD,
 TAILMAIL_FROM, TAILMAIL_CONFIG.

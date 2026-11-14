@@ -9,8 +9,8 @@ how to run it.
 
 | | |
 |---|---|
-| Mail server | **Stalwart** — SMTP, IMAP4, HTTPS, one Rust binary |
-| Webmail | **Bulwark Lite** — served by Stalwart at `/webmail/` |
+| Mail server | **Stalwart**: SMTP, IMAP4, HTTPS, one Rust binary |
+| Webmail | **Bulwark Lite**: served by Stalwart at `/webmail/` |
 | TLS | a **Tailscale-issued certificate** for the node's MagicDNS name |
 | Accounts | internal Stalwart accounts, username = full email address |
 | Exposure | loopback + the node's `100.x` address only |
@@ -69,7 +69,7 @@ There is no Node process, no nginx and no CORS configuration.
 - Tailscale installed, logged in, MagicDNS and **HTTPS certificates** enabled
 - Ports 25, 465, 587, 993 and 443 free on the host
 - Root access
-- About 1 GB of RAM free; 15 MB of disk for the software plus mail
+- 2 GB free on `/var`; about 1 GB of RAM recommended
 
 Details: [01-prerequisites.md](01-prerequisites.md).
 
@@ -80,6 +80,9 @@ Details: [01-prerequisites.md](01-prerequisites.md).
 3. [Accounts and agents](03-accounts-and-agents.md)
 4. [Operations](04-operations.md)
 5. [Troubleshooting](05-troubleshooting.md)
+6. [User guide](user-guide.md)
+7. [Administrator guide](admin-guide.md)
+8. [Architecture decisions](adr/README.md)
 
 ## Repository layout
 
@@ -89,4 +92,6 @@ mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
 scripts/tailmail.py        minimal SMTP/IMAP client for agents
 docs/                      these pages
+LICENSE                    MIT license for the project's code and docs
+THIRD-PARTY-NOTICES.md     upstream licenses and the distribution boundary
 ```

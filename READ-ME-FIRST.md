@@ -48,13 +48,21 @@ helping you.
 | File | What it is |
 |---|---|
 | `setup-mail.sh` | the installer |
+| `make-dist.sh` | rebuilds this tarball |
 | `mail-setup.conf.example` | unattended configuration |
 | `docs/00-overview.md` | architecture and design |
+| `docs/01-prerequisites.md` | host, Tailscale, naming, ports |
 | `docs/02-quickstart.md` | step by step with the flags |
 | `docs/03-accounts-and-agents.md` | accounts, app passwords, agent usage |
 | `docs/04-operations.md` | backups, upgrades, renewal, recovery |
 | `docs/05-troubleshooting.md` | symptoms, causes, fixes |
 | `docs/06-security.md` | threat model and guardrails |
 | `docs/07-migrating-from-dovecot.md` | moving existing mail |
-| `docs/overview.html` | one-page visual overview |
+| `docs/08-faq.md` | short answers to common questions |
+| `docs/user-guide.md` | signing in, mail clients, passwords |
+| `docs/admin-guide.md` | install, backups, upgrades, recovery |
+| `docs/adr/` | design decisions |
+| `docs/releases/unreleased.md` | release notes |
+| `LICENSE` | MIT license for the project's code and docs |
+| `THIRD-PARTY-NOTICES.md` | licenses for software downloaded or installed at runtime |
 | `scripts/tailmail.py` | minimal SMTP/IMAP client for agents |

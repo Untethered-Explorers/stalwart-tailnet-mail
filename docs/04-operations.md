@@ -6,15 +6,15 @@
 sudo ./setup-mail.sh --check
 ```
 
-Checks: Stalwart active, no leftover mail daemons, listeners on the tailnet
-address, no wildcard binds, no 8080, TLS chain and hostname on 993/465/443,
-IMAP login, and HTTP 200 from webmail, `/admin` and `/account`.
+Checks: Stalwart active, listeners on the tailnet address, no 8080, TLS chain
+and hostname on 993/465/443, IMAP login, and HTTP 200 from webmail, `/admin`
+and `/account`. Review `ss -ltn` separately for wildcard binds.
 
 ## Logs
 
 | What | Where |
 |---|---|
-| Installer | `/var/log/mail-setup.log` |
+| Installer | `/var/lib/mail-setup/setup.log` |
 | Stalwart | `journalctl -u stalwart`, `/var/log/stalwart/` |
 | Webmail bundle downloads | Stalwart log, look for `resource.` events |
 
@@ -45,7 +45,9 @@ Stalwart is not an apt package. Take a backup, then run the official installer
 again; it replaces the binary and restarts the service:
 
 ```bash
+sudo systemctl stop stalwart
 sudo tar -C /var/lib -czf /root/stalwart-$(date +%F).tar.gz stalwart
+sudo systemctl start stalwart
 curl --proto '=https' --tlsv1.2 -fsSL https://get.stalw.art/install.sh -o /tmp/install.sh
 sudo sh /tmp/install.sh
 sudo ./setup-mail.sh --check
@@ -77,6 +79,8 @@ Open tabs pick up the new build on their next navigation.
   certificate changed**.
 - `mail-cert-renew.timer` runs weekly.
 - It authenticates with `/root/stalwart-api-key`.
+- It targets `MAIL_DOMAIN`. With a custom domain and your own certificate,
+  replace the script or disable the timer.
 
 ```bash
 systemctl list-timers mail-cert-renew.timer
@@ -127,7 +131,8 @@ sudo sed -i 's/^STALWART_RECOVERY_MODE=/# STALWART_RECOVERY_MODE=/' /etc/stalwar
 sudo systemctl restart stalwart
 ```
 
-Keep `:8080` on loopback. If you need the WebUI there, use an SSH tunnel.
+Treat `:8080` as reachable on every interface. Use an SSH tunnel and close
+recovery mode as soon as the reset is done.
 
 ## Reconfigure after a tailnet IP change
 
@@ -150,20 +155,26 @@ sudo systemctl status stalwart --no-pager
 
 ## Uninstall
 
+Back up first. These commands delete the mail store, credentials, certificates,
+and setup state.
+
 ```bash
 sudo systemctl disable --now stalwart mail-cert-renew.timer
 sudo rm -f /etc/systemd/system/stalwart.service \
            /etc/systemd/system/mail-cert-renew.service \
            /etc/systemd/system/mail-cert-renew.timer \
            /usr/local/sbin/mail-cert-renew /usr/local/bin/stalwart-cli \
-           /root/stalwart-api-key
-sudo rm -rf /var/lib/stalwart /etc/stalwart /var/log/stalwart
+           /usr/local/bin/stalwart \
+           /root/stalwart-api-key /root/stalwart-recovery-password \
+           /root/mail-credentials.txt
+sudo rm -rf /var/lib/stalwart /etc/stalwart /var/log/stalwart \
+            /var/lib/mail-setup /etc/ssl/tailscale
 sudo userdel stalwart 2>/dev/null || true
 sudo systemctl daemon-reload
 ```
 
 Remove the ufw rules if you added them, and delete any tailnet DNS entries you
-created. The mail is in the backup; nothing else remains.
+created.
 
 ## Monitoring
 

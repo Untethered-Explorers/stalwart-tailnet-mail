@@ -28,7 +28,9 @@ ss -ltn | grep -E ':(25|465|587|993|443) '
 sudo ./setup-mail.sh --check
 ```
 
-The check fails if a wildcard bind appears.
+The check looks for listeners on the tailnet address and for an open `:8080`.
+Review `ss -ltn` for wildcard binds; the check does not reject them
+independently.
 
 ## Authentication
 

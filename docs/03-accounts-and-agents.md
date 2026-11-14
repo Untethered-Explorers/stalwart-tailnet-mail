@@ -29,7 +29,7 @@ Only the administrator who runs and updates the server needs a Linux account,
 with SSH key authentication and `sudo`. Everyone else reaches mail from their
 own devices over the tailnet. If someone must run `tailmail.py` or a cron job
 **on the server**, give them a dedicated non-sudo Linux account and an app
-password — never their mailbox password.
+password, never their mailbox password.
 
 | Role | Purpose | Credentials |
 |---|---|---|
@@ -39,10 +39,10 @@ password — never their mailbox password.
 
 ## Passwords and app passwords
 
-- **Account password** — used for IMAP/SMTP and webmail login. Changing it
+- **Account password**: used for IMAP/SMTP and webmail login. Changing it
   signs out webmail sessions and connected applications, but leaves app
   passwords working.
-- **App password** — a secondary credential for one device or agent. Created
+- **App password**: a secondary credential for one device or agent. Created
   in the webmail Account Manager (`/account`) or the admin console
   (**Management → Directory → Accounts → Credentials**). The server shows the
   secret once.
@@ -177,7 +177,7 @@ need one of:
 - Rotate by creating a new app password and deleting the old one; update the
   config in the same window.
 - Stalwart bans an address after repeated failed logins (100/day by default).
-  A stale credential in a retry loop can lock the agent out — rotate, don't
+  A stale credential in a retry loop can lock the agent out. Rotate, don't
   retry.
 - Keep agent config files at `0600`; never put the secret in a prompt or a
   repository.

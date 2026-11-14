@@ -40,7 +40,7 @@ Renewal                weekly timer
 Verification           listeners, TLS, IMAP login, webmail HTTP
 ```
 
-The web wizard is **not** used. The script pins an administrator, submits the
+The web wizard is not used. The script pins an administrator, submits the
 `Bootstrap` object through the JMAP API, and continues in recovery mode. If a
 future Stalwart changes the API, the script stops with a clear message and you
 can fall back to the wizard (see below).
@@ -78,8 +78,10 @@ sudo shred -u /root/mail-credentials.txt
 sudo ./setup-mail.sh --check
 ```
 
-It checks services, listeners, wildcard binds, TLS on 993/465/443, IMAP login
-as the human account, and the webmail, admin and account pages.
+It checks the Stalwart service, listeners on the tailnet address, TLS on
+993/465/443, IMAP login as the human account, and the webmail, admin and
+account pages. It reports a failure if `:8080` is open. Review `ss -ltn` for
+wildcard binds; the check does not reject them independently.
 
 ## Unattended install
 
@@ -119,7 +121,7 @@ The script never prompts when `--config` is used with `--yes`.
 
 The browser path still works:
 
-1. `sudo systemctl restart stalwart` — it starts in bootstrap mode.
+1. `sudo systemctl restart stalwart`: it starts in bootstrap mode.
 2. Get the temporary admin password:
    ```bash
    sudo journalctl -u stalwart -n 200 | grep -A8 'bootstrap mode'
@@ -134,5 +136,5 @@ The browser path still works:
 
 ## Logs
 
-Everything is appended to `/var/log/mail-setup.log`. On failure the script
+Everything is appended to `/var/lib/mail-setup/setup.log`. On failure the script
 prints the failing line and tells you to run `--diagnose`.
