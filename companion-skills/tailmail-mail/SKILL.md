@@ -10,6 +10,8 @@ dedicated agent mailbox, not the mail-server administrator account. When the
 project's `AGENTS.md` has a managed Tailmail section, use the installed
 `tailmail-agent` command shown there; it owns the always-on watcher and routes
 allowlisted mail to this project. Otherwise, use `tailmail` directly.
+When the managed section names a mail-client path, use that path in place of
+`tailmail` in the commands below.
 
 If `tailmail` is unavailable or not configured, explain that the user can
 install it and run `tailmail configure` locally. Let them enter the app

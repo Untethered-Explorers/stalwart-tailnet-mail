@@ -86,9 +86,10 @@ installs it locally and prompts for a mailbox app password without changing
 the server setup. The CLI also supports JSON output, waiting for new mail,
 attachments, and reply threading. See
 [Email as a coding-agent harness channel](docs/09-agent-harness.md) for a
-step-by-step integration guide. The harness remains user-managed; the optional
+quickstart and integration guide. The harness remains user-managed; the optional
 watcher can install a per-user service that routes allowlisted mail to OpenCode
-or Copilot CLI.
+or Copilot CLI. For guided setup, run `python3 scripts/tailmail_agent.py setup`;
+the flag-based `install` command remains available for automation.
 
 ## Tech Stack
 

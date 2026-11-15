@@ -149,8 +149,24 @@ idempotently-updated section to the project's existing `AGENTS.md`.
 
 ## Optional always-on watcher
 
-Configure `tailmail` first, then install one watcher profile for a project and
-harness:
+### Quickstart
+
+From the project repository on the coding-agent host, run:
+
+```bash
+python3 scripts/tailmail_agent.py setup
+```
+
+Choose the project, harness, sender addresses allowed to submit mail tasks,
+and polling interval. Review the summary and confirm; if no mailbox config
+exists, the wizard then opens the existing `tailmail configure` flow for the
+mailbox hostname, address, and app password. It installs the watcher, skill,
+and project guidance. Use the harness launch command it prints so the watcher
+can recognize the active session. Only configured senders are actionable.
+
+### Noninteractive installation
+
+For automation, configure `tailmail` first, then run:
 
 ```bash
 python3 scripts/tailmail_agent.py install \
@@ -163,11 +179,11 @@ python3 scripts/tailmail_agent.py install \
 Use `--harness copilot` for Copilot CLI. Repeat `--allow-sender` for additional
 authorized addresses; the first address receives permission-request emails.
 The installer stores the profile under the local user's config directory,
-copies the watcher and skill into the user's application directory, installs
-the skill in the project, and adds managed email guidance without replacing
-existing `AGENTS.md` content. The installer prints the command to start the
-configured harness; use that command so the watcher can recognize its active
-session.
+copies the mail client, watcher, and skill into the user's application
+directory, installs the client and watcher launchers, installs the skill in
+the project, and adds managed email guidance without replacing existing
+`AGENTS.md` content. The installer prints the command to start the configured
+harness; use that command so the watcher can recognize its active session.
 
 The watcher installs a user-level service using systemd on Linux, launchd on
 macOS, or Task Scheduler on Windows. It polls every 15 seconds by default;

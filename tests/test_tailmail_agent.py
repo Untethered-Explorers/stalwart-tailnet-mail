@@ -26,6 +26,140 @@ SPEC.loader.exec_module(tailmail_agent)
 
 
 class TailmailAgentTests(unittest.TestCase):
+    def test_setup_configures_mailbox_then_delegates_to_installer(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project = root / "sample project"
+            project.mkdir()
+            config_path = root / "tailmail-config"
+            answers = [
+                str(root / "missing"),
+                str(project),
+                "bad/profile",
+                "",
+                "python",
+                "opencode",
+                "",
+                "alice@example.test",
+                "y",
+                "Bob <bob@example.test>",
+                "n",
+                "2",
+                "30",
+                "y",
+            ]
+            output = io.StringIO()
+
+            def configure(_args):
+                config_path.write_text("configured", encoding="utf-8")
+                return 0
+
+            with (
+                patch.object(tailmail_agent.tailmail, "CONFIG_PATH", config_path),
+                patch.object(
+                    tailmail_agent.tailmail,
+                    "cmd_configure",
+                    side_effect=configure,
+                ) as configure_mock,
+                patch.object(tailmail_agent.shutil, "which", return_value="/usr/bin/opencode"),
+                patch.object(tailmail_agent, "install_profile") as install_mock,
+                patch("builtins.input", side_effect=answers),
+                redirect_stdout(output),
+            ):
+                installed = tailmail_agent.setup_interactive()
+
+        self.assertTrue(installed)
+        configure_mock.assert_called_once_with(None)
+        install_mock.assert_called_once_with(
+            "sample-project",
+            project.resolve(),
+            "opencode",
+            ["alice@example.test", "bob@example.test"],
+            SCRIPTS_DIR.parent.resolve(),
+            30,
+        )
+        self.assertIn("Polling interval must be between 5 and 3600 seconds.", output.getvalue())
+
+    def test_setup_reuses_existing_mail_config_and_defaults(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project = root / "project"
+            project.mkdir()
+            config_path = root / "tailmail-config"
+            config_path.write_text("existing configuration", encoding="utf-8")
+            output = io.StringIO()
+            answers = [str(project), "", "", "alice@example.test", "n", "", "y"]
+
+            with (
+                patch.object(tailmail_agent.tailmail, "CONFIG_PATH", config_path),
+                patch.object(tailmail_agent.tailmail, "cmd_configure") as configure_mock,
+                patch.object(tailmail_agent.shutil, "which", return_value="/usr/bin/copilot"),
+                patch.object(tailmail_agent, "install_profile") as install_mock,
+                patch("builtins.input", side_effect=answers),
+                redirect_stdout(output),
+            ):
+                installed = tailmail_agent.setup_interactive()
+
+        self.assertTrue(installed)
+        configure_mock.assert_not_called()
+        install_mock.assert_called_once_with(
+            "project",
+            project.resolve(),
+            "copilot",
+            ["alice@example.test"],
+            SCRIPTS_DIR.parent.resolve(),
+            tailmail_agent.DEFAULT_POLL_SECONDS,
+        )
+        self.assertIn(f"Mailbox config: existing ({config_path})", output.getvalue())
+
+    def test_setup_cancellation_does_not_configure_or_install(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            project = root / "project"
+            project.mkdir()
+            config_path = root / "tailmail-config"
+            answers = [str(project), "", "", "alice@example.test", "n", "", "n"]
+
+            with (
+                patch.object(tailmail_agent.tailmail, "CONFIG_PATH", config_path),
+                patch.object(tailmail_agent.shutil, "which", return_value="/usr/bin/copilot"),
+                patch.object(tailmail_agent.tailmail, "cmd_configure") as configure_mock,
+                patch.object(tailmail_agent, "install_profile") as install_mock,
+                patch("builtins.input", side_effect=answers),
+            ):
+                installed = tailmail_agent.setup_interactive()
+
+        self.assertFalse(installed)
+        self.assertFalse(config_path.exists())
+        configure_mock.assert_not_called()
+        install_mock.assert_not_called()
+
+    def test_setup_command_requires_a_terminal(self):
+        with (
+            patch.object(tailmail_agent.sys.stdin, "isatty", return_value=False),
+            self.assertRaisesRegex(tailmail_agent.AgentError, "interactive terminal"),
+        ):
+            tailmail_agent._cmd_setup(None)
+
+    def test_launcher_installs_both_tailmail_commands(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            home = root / "home"
+            home.mkdir()
+            script_dir = root / "app" / "scripts"
+            agent_script = script_dir / "tailmail_agent.py"
+
+            with patch.object(tailmail_agent.Path, "home", return_value=home):
+                launcher = tailmail_agent._write_launcher(agent_script)
+
+            mail_launcher = home / ".local" / "bin" / "tailmail"
+            self.assertTrue(launcher.is_file())
+            self.assertTrue(mail_launcher.is_file())
+            self.assertIn("tailmail_agent.py", launcher.read_text(encoding="utf-8"))
+            self.assertIn("tailmail.py", mail_launcher.read_text(encoding="utf-8"))
+            self.assertEqual(launcher.stat().st_mode & 0o777, 0o755)
+            self.assertEqual(mail_launcher.stat().st_mode & 0o777, 0o755)
+
     def test_poll_persists_uid_cursor_and_filters_senders(self):
         messages = [
             {"uid": 12, "from": "Alice <alice@example.test>", "subject": "Task"},
@@ -268,6 +402,7 @@ class TailmailAgentTests(unittest.TestCase):
             mail_config = root / "tailmail-config"
             mail_config.write_text("credentials are not read by this test")
             launcher = root / "bin" / "tailmail-agent"
+            mail_launcher = root / "bin" / "tailmail"
             output = io.StringIO()
 
             with (
@@ -285,6 +420,11 @@ class TailmailAgentTests(unittest.TestCase):
                 patch.object(tailmail_agent.shutil, "which", return_value="/usr/bin/copilot"),
                 patch.object(tailmail_agent, "latest_mail_uid", return_value=4),
                 patch.object(tailmail_agent, "_write_launcher", return_value=launcher),
+                patch.object(
+                    tailmail_agent,
+                    "_tailmail_launcher_path",
+                    return_value=mail_launcher,
+                ),
                 patch.object(tailmail_agent, "_install_service"),
                 redirect_stdout(output),
             ):
@@ -316,6 +456,7 @@ class TailmailAgentTests(unittest.TestCase):
             self.assertEqual(first_guidance, second_guidance)
             self.assertIn("# Existing\n", second_guidance)
             self.assertIn(str(launcher), second_guidance)
+            self.assertIn(str(mail_launcher), second_guidance)
             self.assertIn("email the user", second_guidance)
             self.assertEqual(profile["harness_executable"], "/usr/bin/copilot")
             self.assertEqual(initial_cursor, 4)
