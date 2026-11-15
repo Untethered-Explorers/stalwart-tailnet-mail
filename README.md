@@ -86,8 +86,9 @@ installs it locally and prompts for a mailbox app password without changing
 the server setup. The CLI also supports JSON output, waiting for new mail,
 attachments, and reply threading. See
 [Email as a coding-agent harness channel](docs/09-agent-harness.md) for a
-step-by-step integration guide. The harness itself remains user-managed; the
-companion does not launch agents or install a background service.
+step-by-step integration guide. The harness remains user-managed; the optional
+watcher can install a per-user service that routes allowlisted mail to OpenCode
+or Copilot CLI.
 
 ## Tech Stack
 
@@ -132,6 +133,7 @@ setup-mail.sh              installer and phase runner
 mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
 scripts/tailmail.py        minimal SMTP/IMAP client for agents
+scripts/tailmail_agent.py  optional per-user mailbox watcher and installer
 scripts/install-tailmail-harness.sh  optional per-user CLI setup
 companion-skills/          copyable coding-agent skills for tailmail
 examples/mail-harness/     copyable project-level AGENTS.md guidance
@@ -254,6 +256,7 @@ There is no `CONTRIBUTING.md` and no CI workflow. The current workflow is:
    bash -n setup-mail.sh
    python3 -m unittest discover -s tests -p 'test_*.py'
    python3 -m py_compile scripts/tailmail.py
+   python3 -m py_compile scripts/tailmail_agent.py
    bash -n scripts/install-tailmail-harness.sh
    ./make-dist.sh
    git diff --check
@@ -291,7 +294,8 @@ rollback. Open an issue if you want to work on one of these.
 
 The project's original source code and Markdown documentation are licensed under
 the [MIT License](LICENSE). That covers `setup-mail.sh`, `make-dist.sh`,
-`scripts/tailmail.py`, `scripts/install-tailmail-harness.sh`, the tests,
+`scripts/tailmail.py`, `scripts/tailmail_agent.py`,
+`scripts/install-tailmail-harness.sh`, the companion skill, tests,
 `mail-setup.conf.example`, and the Markdown docs.
 
 Third-party software is not covered by that license. Stalwart and
