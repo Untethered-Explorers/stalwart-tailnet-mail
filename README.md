@@ -133,6 +133,8 @@ mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
 scripts/tailmail.py        minimal SMTP/IMAP client for agents
 scripts/install-tailmail-harness.sh  optional per-user CLI setup
+companion-skills/          copyable coding-agent skills for tailmail
+examples/mail-harness/     copyable project-level AGENTS.md guidance
 docs/                      topic guides, user and admin guides, ADRs, release notes
 docs/adr/                  architecture decision records
 docs/releases/             release notes

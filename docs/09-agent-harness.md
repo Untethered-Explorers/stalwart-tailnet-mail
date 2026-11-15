@@ -127,13 +127,14 @@ separate always-on dispatcher, which is not part of this setup.
 ## Add reusable project guidance
 
 To make the mail workflow available while an agent works in one of your
-repositories, copy the example bundle into that repository:
+repositories, copy the guidance and skill files from this repository:
 
 1. Merge [`examples/mail-harness/AGENTS.md`](../examples/mail-harness/AGENTS.md)
    into the repository's existing `AGENTS.md`; preserve its other guidance.
 2. Copy
-   [`examples/mail-harness/.agents/skills/tailmail-mail/`](../examples/mail-harness/.agents/skills/tailmail-mail/)
-   into the repository's `.agents/skills/` directory.
+   [`companion-skills/tailmail-mail/`](../companion-skills/tailmail-mail/)
+   into the repository's `.agents/skills/tailmail-mail/` directory so the
+   agent can discover it.
 3. Install and configure `tailmail` on the machine where the agent runs, as
    described above.
 
