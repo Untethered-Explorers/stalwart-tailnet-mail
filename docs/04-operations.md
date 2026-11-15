@@ -158,25 +158,40 @@ is closed before retrying.
 ```bash
 sudo systemctl restart stalwart
 sudo systemctl status stalwart --no-pager
+sudo systemctl status stalwart-tailnet-restart.service --no-pager
 ```
 
 ### After a Pi reboot
 
-If webmail is unavailable after reboot, first confirm Tailscale is connected
-and has assigned an address, then restart Stalwart:
+The installer enables `stalwart-tailnet-restart.service`. At boot it waits up
+to three minutes for Tailscale to have an IPv4 address, checks Stalwart's five
+tailnet listeners, and restarts Stalwart only if one or more are missing. It
+does not change listener configuration or mail data.
+
+If you installed mail before this helper was added, install it once from the
+project directory:
+
+```bash
+sudo ./scripts/install-stalwart-tailnet-restart.sh
+```
+
+If webmail is still unavailable, check Tailscale, then inspect the helper's
+status and log:
 
 ```bash
 tailscale status
 tailscale ip -4
-sudo systemctl restart stalwart
+sudo systemctl status stalwart-tailnet-restart.service --no-pager
+sudo journalctl -u stalwart-tailnet-restart.service -n 50 --no-pager
 sudo ss -ltnp | grep -E ':(443|8080)\b'
 ```
 
 Port 443 should listen on both `127.0.0.1` and the current Tailscale IP; port
-8080 should not be listening. Then open
-`https://<Pi-MagicDNS-name>/webmail/` from a device on the tailnet. If port 443
-still lacks the Tailscale IP, run `sudo ./setup-mail.sh --check` and see
+8080 should not be listening. If Tailscale came online after the helper timed
+out, start it again with `sudo systemctl start stalwart-tailnet-restart.service`.
+If the tailnet IP changed, use
 [Reconfigure after a tailnet IP change](#reconfigure-after-a-tailnet-ip-change).
+Then open `https://<Pi-MagicDNS-name>/webmail/` from a device on the tailnet.
 
 ## Uninstall
 
@@ -184,11 +199,15 @@ Back up first. These commands delete the mail store, credentials, certificates,
 and setup state.
 
 ```bash
-sudo systemctl disable --now stalwart mail-cert-renew.timer
+sudo systemctl disable --now stalwart mail-cert-renew.timer \
+    stalwart-tailnet-restart.service
 sudo rm -f /etc/systemd/system/stalwart.service \
            /etc/systemd/system/mail-cert-renew.service \
            /etc/systemd/system/mail-cert-renew.timer \
-           /usr/local/sbin/mail-cert-renew /usr/local/bin/stalwart-cli \
+           /etc/systemd/system/stalwart-tailnet-restart.service \
+           /usr/local/sbin/mail-cert-renew \
+           /usr/local/sbin/stalwart-tailnet-restart \
+           /usr/local/bin/stalwart-cli \
            /usr/local/bin/stalwart \
            /root/stalwart-api-key /root/stalwart-recovery-password \
            /root/mail-credentials.txt

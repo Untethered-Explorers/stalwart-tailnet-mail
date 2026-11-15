@@ -23,6 +23,8 @@ tagged release yet, so `[Unreleased]` describes the current tree.
   `inbox`, and `read` commands.
 - Installer modes for preflight, verification, diagnosis, resume, and
   reconfiguration after a tailnet IP change.
+- A boot-time systemd helper that waits for Tailscale and restarts Stalwart only
+  when its tailnet listeners are missing.
 - Redacted support bundle generation for troubleshooting.
 - Topic documentation, a user guide, an administrator guide, architecture
   decision records, and release notes.
@@ -31,6 +33,7 @@ tagged release yet, so `[Unreleased]` describes the current tree.
   boundary.
 - The hand-off tarball now includes the README, changelog, user and admin
   guides, ADRs, release notes, license, third-party notices, and `make-dist.sh`.
+- The hand-off tarball includes the Tailscale boot helper and its systemd unit.
 
 ### Changed
 

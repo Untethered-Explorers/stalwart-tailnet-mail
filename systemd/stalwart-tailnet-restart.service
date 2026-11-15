@@ -1,0 +1,15 @@
+[Unit]
+Description=Ensure Stalwart listeners are bound to the Tailscale IP
+Wants=stalwart.service tailscaled.service
+After=stalwart.service tailscaled.service
+ConditionPathExists=/etc/stalwart/config.json
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/usr/local/sbin/stalwart-tailnet-restart
+TimeoutStartSec=360
+
+[Install]
+WantedBy=multi-user.target
