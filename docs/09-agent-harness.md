@@ -117,6 +117,180 @@ On first startup, choose how to handle messages already in the mailbox: start
 at UID `0` to process the backlog, or seed the cursor from the latest UID to
 ignore older mail. Do not silently skip old mail if it may contain a request.
 
+### Example bridge loop
+
+This Python example implements a small SQLite inbox queue. Set the mailbox and
+sender allowlist for your environment. A separate worker should claim queued
+jobs and call your OpenCode, Copilot, or other runtime adapter.
+
+```python
+import json
+import shutil
+import sqlite3
+import subprocess
+import tempfile
+from contextlib import closing
+from email.utils import getaddresses
+from pathlib import Path
+
+MAILBOX = "agent-build@host.tailnet.ts.net"
+ALLOWED_SENDERS = {"alice@host.tailnet.ts.net"}
+JOB_ROOT = Path("/var/lib/my-harness/jobs")
+JOB_ROOT.mkdir(mode=0o700, parents=True, exist_ok=True)
+DATABASE = JOB_ROOT / "queue.sqlite3"
+
+
+def tailmail(*args):
+    return subprocess.run(
+        ["tailmail", *args], text=True, capture_output=True, check=False
+    )
+
+
+def connect():
+    return sqlite3.connect(DATABASE, timeout=30)
+
+
+with closing(connect()) as db:
+    db.executescript(
+        """
+        CREATE TABLE IF NOT EXISTS mailbox_state (
+            mailbox TEXT NOT NULL,
+            folder TEXT NOT NULL,
+            uid INTEGER NOT NULL,
+            PRIMARY KEY (mailbox, folder)
+        );
+        CREATE TABLE IF NOT EXISTS jobs (
+            job_id TEXT NOT NULL UNIQUE,
+            mailbox TEXT NOT NULL,
+            folder TEXT NOT NULL,
+            uid INTEGER NOT NULL,
+            sender TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            request_json TEXT NOT NULL,
+            stage_dir TEXT NOT NULL,
+            status TEXT NOT NULL,
+            UNIQUE (mailbox, folder, uid)
+        );
+        """
+    )
+    db.commit()
+
+
+def load_cursor(mailbox, folder):
+    with closing(connect()) as db:
+        row = db.execute(
+            "SELECT uid FROM mailbox_state WHERE mailbox = ? AND folder = ?",
+            (mailbox, folder),
+        ).fetchone()
+    return row[0] if row else 0
+
+
+def record_and_advance(message, status, request=None, stage_dir=""):
+    uid = message["uid"]
+    job_id = f"{MAILBOX}:INBOX:{uid}"
+    with closing(connect()) as db:
+        with db:
+            db.execute(
+                """
+                INSERT OR IGNORE INTO jobs
+                    (job_id, mailbox, folder, uid, sender, subject,
+                     request_json, stage_dir, status)
+                VALUES (?, ?, 'INBOX', ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    job_id,
+                    MAILBOX,
+                    uid,
+                    message["from"],
+                    message["subject"],
+                    json.dumps(request or {}),
+                    stage_dir,
+                    status,
+                ),
+            )
+            db.execute(
+                """
+                INSERT INTO mailbox_state (mailbox, folder, uid)
+                VALUES (?, 'INBOX', ?)
+                ON CONFLICT (mailbox, folder)
+                DO UPDATE SET uid = MAX(mailbox_state.uid, excluded.uid)
+                """,
+                (MAILBOX, uid),
+            )
+
+
+def wait_one(after_uid):
+    result = tailmail(
+        "wait", "--after", str(after_uid), "--timeout", "60", "--json"
+    )
+    if result.returncode == 3:
+        return None
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or "tailmail wait failed")
+    return json.loads(result.stdout)
+
+
+def addresses(header):
+    return {
+        address.casefold()
+        for _name, address in getaddresses([header])
+        if address
+    }
+
+
+def accepted(message):
+    return (
+        addresses(message["from"]) & ALLOWED_SENDERS
+        and MAILBOX.casefold() in addresses(message["to"])
+        and message["subject"].startswith("[agent-job]")
+    )
+
+
+def handle_one(cursor):
+    message = wait_one(cursor)
+    if message is None:
+        return cursor
+
+    uid = message["uid"]
+    if not accepted(message):
+        record_and_advance(message, "rejected")
+        return uid
+
+    stage = Path(tempfile.mkdtemp(prefix=f"mail-{uid}-", dir=JOB_ROOT))
+    try:
+        result = tailmail(
+            "read", str(uid), "--json", "--attachments-dir", str(stage / "files")
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "tailmail read failed")
+        request = json.loads(result.stdout)
+        record_and_advance(request, "queued", request, str(stage))
+    except Exception:
+        shutil.rmtree(stage)
+        raise
+    return uid
+
+
+# A missing cursor defaults to 0 and drains the existing inbox backlog.
+cursor = load_cursor(MAILBOX, "INBOX")
+while True:
+    cursor = handle_one(cursor)
+```
+
+`record_and_advance` commits the queued or rejected message and the new cursor
+in one SQLite transaction. The unique mailbox/folder/UID key makes retries
+idempotent. A worker can query `jobs` for `status = 'queued'`, atomically claim
+one, and pass its saved request and staging directory to a fixed agent runner;
+update the job status as it starts and finishes. This example only handles
+incoming jobs—it does not implement session resumption or outbound replies.
+
+The sender comparison above is an allowlist filter, not proof of identity:
+email `From` headers can be spoofed. Use it only with the trust controls
+described below. Run the bridge as a trusted service account. Do not pass its
+mail credentials or config file into the agent process; dispatch jobs through
+a separate worker under a restricted account or container, with a fixed
+runtime adapter and an isolated workspace.
+
 Do not use the email body as a shell command or interpolate it into a command
 string. Invoke the agent through its normal API or a subprocess argument array,
 with a fixed executable and explicit workspace. On completion, or when the
@@ -242,7 +416,7 @@ ALPHA
 ```
 
 Send an email from the authorized human account to the dedicated trigger
-mailbox with subject `[harness-test:attachment-1] Count ALPHA` and body:
+mailbox with subject `[agent-job] attachment-1 Count ALPHA` and body:
 “Count the lines that are exactly `ALPHA` in the attached text file. Save only
 the count to `result.txt` and report the result.” Attach `count-me.txt`.
 
