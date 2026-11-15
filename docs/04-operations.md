@@ -137,14 +137,21 @@ recovery mode as soon as the reset is done.
 ## Reconfigure after a tailnet IP change
 
 Listeners pin `100.x.y.z`. If the address changes (re-auth, new node), update
-the binds:
+the binds. A normal reboot does not by itself require reconfiguration. First
+wait until Tailscale has an address, then restart Stalwart and verify the binds
+as described below.
 
 ```bash
 sudo ./setup-mail.sh --reconfigure
 ```
 
-It enters the existing recovery data, updates every listener to the new
-address, and restarts the service.
+This temporarily enters recovery mode, then updates or creates the named
+listeners for the current tailnet IP. It does not create, remove, or modify
+accounts or mail data. It requires `/usr/local/bin/stalwart-cli` and a valid
+recovery admin password in `/root/stalwart-recovery-password`; if it fails,
+recovery mode may remain enabled. Disable recovery mode as shown under
+[Recovering access](#recovering-access), restart Stalwart, and confirm port 8080
+is closed before retrying.
 
 ## Restart and status
 
@@ -152,6 +159,24 @@ address, and restarts the service.
 sudo systemctl restart stalwart
 sudo systemctl status stalwart --no-pager
 ```
+
+### After a Pi reboot
+
+If webmail is unavailable after reboot, first confirm Tailscale is connected
+and has assigned an address, then restart Stalwart:
+
+```bash
+tailscale status
+tailscale ip -4
+sudo systemctl restart stalwart
+sudo ss -ltnp | grep -E ':(443|8080)\b'
+```
+
+Port 443 should listen on both `127.0.0.1` and the current Tailscale IP; port
+8080 should not be listening. Then open
+`https://<Pi-MagicDNS-name>/webmail/` from a device on the tailnet. If port 443
+still lacks the Tailscale IP, run `sudo ./setup-mail.sh --check` and see
+[Reconfigure after a tailnet IP change](#reconfigure-after-a-tailnet-ip-change).
 
 ## Uninstall
 
