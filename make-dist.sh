@@ -18,7 +18,8 @@ STAGE="$HERE/dist/$NAME"
 OUT="$HERE/dist/$NAME.tar.gz"
 
 rm -rf "$STAGE"
-mkdir -p "$STAGE/docs/adr" "$STAGE/docs/releases" "$STAGE/scripts"
+mkdir -p "$STAGE/docs/adr" "$STAGE/docs/releases" "$STAGE/scripts" \
+  "$STAGE/companion-skills/tailmail-mail" "$STAGE/examples/mail-harness"
 
 cp "$HERE/setup-mail.sh" "$HERE/make-dist.sh" "$STAGE/"
 cp "$HERE/mail-setup.conf.example" "$STAGE/"
@@ -28,7 +29,11 @@ cp "$HERE"/docs/*.md "$STAGE/docs/"
 cp "$HERE"/docs/adr/*.md "$STAGE/docs/adr/"
 cp "$HERE"/docs/releases/*.md "$STAGE/docs/releases/"
 cp "$HERE/scripts/tailmail.py" "$STAGE/scripts/"
+cp "$HERE/scripts/tailmail_agent.py" "$STAGE/scripts/"
 cp "$HERE"/scripts/*.sh "$STAGE/scripts/"
+cp "$HERE/companion-skills/tailmail-mail/SKILL.md" \
+   "$STAGE/companion-skills/tailmail-mail/"
+cp "$HERE/examples/mail-harness/AGENTS.md" "$STAGE/examples/mail-harness/"
 mkdir -p "$STAGE/systemd"
 cp "$HERE"/systemd/*.service "$STAGE/systemd/"
 chmod +x "$STAGE/setup-mail.sh" "$STAGE/make-dist.sh" "$STAGE"/scripts/*.sh

@@ -1,15 +1,15 @@
-# Email with a user-started coding-agent session
+# Email as a coding-agent harness channel
 
 This optional setup lets a coding-agent session send messages to the user and
-receive email replies over the tailnet. The user starts OpenCode or GitHub
-Copilot CLI as usual; while that session is active, it can use `tailmail` to
-wait for mail and continue. Stalwart and `tailmail` do not start an agent
-session when an email arrives, and no background service is required.
+receive email replies over the tailnet. Use `tailmail` directly for a
+user-started session, or install the optional per-user watcher to monitor mail
+and route allowlisted replies and tasks to OpenCode or GitHub Copilot CLI.
 
 `tailmail` is the mail adapter: it handles SMTP/IMAP, message threading,
 attachments, and JSON output. It does not install an agent runtime or modify
-the mail server. No OpenCode or Copilot plugin is required for basic testing;
-the agent can invoke `tailmail` through its normal terminal tool.
+the mail server. The watcher runs on the coding-agent host, not the mail
+server. No OpenCode or Copilot plugin is required; the agent can invoke the
+mail tools through its normal terminal tool.
 
 ## What the CLI provides
 
@@ -21,11 +21,13 @@ the agent can invoke `tailmail` through its normal terminal tool.
 - optional attachment saving with generated safe filenames and a 10 MiB
   per-attachment limit by default;
 - JSON output so a harness or coding-agent session can consume messages.
+- `scripts/tailmail_agent.py` optionally installs a per-user watcher that polls
+  the mailbox, filters senders, and routes messages to the selected harness.
 
 `wait` returns one message after a caller-supplied IMAP UID. The active session
 must retain the latest UID it processed and decide which messages belong to
-its task. If no session is waiting, messages remain in the mailbox until the
-user starts a session and reads them.
+its task. Without the watcher, messages remain in the mailbox until the user
+starts a session and reads them.
 
 ## 1. Create a mailbox for the agent
 
@@ -119,12 +121,84 @@ trusted. The same mail workflow applies to both. Ask the agent to:
    `tailmail send --in-reply-to <message-id>`.
 
 The email body is task input, not a shell command. Do not execute attachments.
-If the session exits or is closed, no process will watch the mailbox; start a
-new session and inspect the inbox to continue manually. To launch a new coding
-session automatically from an email while no session is active requires a
-separate always-on dispatcher, which is not part of this setup.
+Without the watcher, mail remains in the mailbox after the session exits. With
+the watcher, allowlisted mail is queued or routed according to the active
+harness profile.
 
-## 5. Two test scenarios for OpenCode and Copilot CLI
+## Add reusable project guidance
+
+To make the mail workflow available while an agent works in one of your
+repositories, copy the guidance and skill files from this repository:
+
+1. Merge [`examples/mail-harness/AGENTS.md`](../examples/mail-harness/AGENTS.md)
+   into the repository's existing `AGENTS.md`; preserve its other guidance.
+2. Copy
+   [`companion-skills/tailmail-mail/`](../companion-skills/tailmail-mail/)
+   into the repository's `.agents/skills/tailmail-mail/` directory so the
+   agent can discover it.
+3. Install and configure `tailmail` on the machine where the agent runs, as
+   described above.
+
+The `AGENTS.md` entry points the agent to the automatically discoverable skill
+when it needs to check mail, get a human answer, or send an update. The skill
+uses the account selected by the local `tailmail` configuration; the copied
+files do not contain account addresses or credentials, install an agent
+runtime, or start background mail monitoring. For an always-on setup, use the
+watcher installer below; it copies the skill and appends a marked,
+idempotently-updated section to the project's existing `AGENTS.md`.
+
+## Optional always-on watcher
+
+### Quickstart
+
+From the project repository on the coding-agent host, run:
+
+```bash
+python3 scripts/tailmail_agent.py setup
+```
+
+Choose the project, harness, sender addresses allowed to submit mail tasks,
+and polling interval. Review the summary and confirm; if no mailbox config
+exists, the wizard then opens the existing `tailmail configure` flow for the
+mailbox hostname, address, and app password. It installs the watcher, skill,
+and project guidance. Use the harness launch command it prints so the watcher
+can recognize the active session. Only configured senders are actionable.
+
+### Noninteractive installation
+
+For automation, configure `tailmail` first, then run:
+
+```bash
+python3 scripts/tailmail_agent.py install \
+  --profile work \
+  --project "$HOME/src/project" \
+  --harness opencode \
+  --allow-sender alice@example.test
+```
+
+Use `--harness copilot` for Copilot CLI. Repeat `--allow-sender` for additional
+authorized addresses; the first address receives permission-request emails.
+The installer stores the profile under the local user's config directory,
+copies the mail client, watcher, and skill into the user's application
+directory, installs the client and watcher launchers, installs the skill in
+the project, and adds managed email guidance without replacing existing
+`AGENTS.md` content. The installer prints the command to start the configured
+harness; use that command so the watcher can recognize its active session.
+
+The watcher installs a user-level service using systemd on Linux, launchd on
+macOS, or Task Scheduler on Windows. It polls every 15 seconds by default;
+`--poll-seconds` accepts values from 5 through 3600. Only configured senders
+are actionable. Use one profile per mailbox to avoid competing UID cursors.
+OpenCode messages are sent to its local server; Copilot messages wait in the
+queue while a session is active and are checked by the skill, or start a
+prompt-driven session when none is active.
+
+To remove the service, run the installed command with
+`uninstall --profile work`. This leaves the profile, queued mail, copied skill,
+and managed `AGENTS.md` section in place. Remove project guidance and the
+project skill manually if they are no longer wanted.
+
+## 6. Two test scenarios for OpenCode and Copilot CLI
 
 Run both scenarios once in OpenCode and once in Copilot CLI. Use a dedicated
 test mailbox and an authorized human address. The prompts below assume the
@@ -182,14 +256,17 @@ session startup.
 - The configured sender address is ordinary email metadata, not cryptographic
   proof of identity. Check sender, recipient, and thread before acting; use
   stronger verification for consequential work.
+- Email permission approval is limited to exact, non-hidden read paths inside
+  the project. Wildcard, outside-project, sensitive-path, other, and unknown
+  OpenCode permissions require local approval. Copilot CLI email permission
+  hooks are not enabled, so its local permission controls remain authoritative.
 - Treat email text and attachments as untrusted input. `tailmail` does not
   extract archives, scan for malware, or sanitize document contents.
 - Use a dedicated app password for this agent and revoke it when no longer
   needed. Do not put credentials in prompts, source files, or email content.
 - The config is protected from other OS users by mode `0600`, but a coding
-  agent with shell access as the same OS user could read it. This user-started
-  workflow assumes you trust the local agent session; it is not an isolation
-  boundary.
+  agent with shell access as the same OS user could read it. The watcher and
+  agent run as that user; this is not an isolation boundary.
 - Keep each job in a disposable workspace and require human approval for
   consequential actions.
 - Logs may contain message content or attachment names; set retention and
