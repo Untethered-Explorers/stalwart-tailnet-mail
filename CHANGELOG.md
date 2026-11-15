@@ -21,6 +21,10 @@ tagged release yet, so `[Unreleased]` describes the current tree.
   first agent.
 - `scripts/tailmail.py`, a standard-library SMTP/IMAP client with `send`,
   `inbox`, and `read` commands.
+- Harness-facing JSON output, IMAP wait, attachment transfer, and reply
+  threading in `tailmail.py`, plus a per-user installer/configurator and an
+  email-to-agent integration guide.
+- Focused standard-library tests for the harness-facing mail client behavior.
 - Installer modes for preflight, verification, diagnosis, resume, and
   reconfiguration after a tailnet IP change.
 - A boot-time systemd helper that waits for Tailscale and restarts Stalwart only

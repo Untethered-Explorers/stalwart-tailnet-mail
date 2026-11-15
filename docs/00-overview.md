@@ -78,11 +78,12 @@ Details: [01-prerequisites.md](01-prerequisites.md).
 1. [Prerequisites](01-prerequisites.md)
 2. [Quick start](02-quickstart.md)
 3. [Accounts and agents](03-accounts-and-agents.md)
-4. [Operations](04-operations.md)
-5. [Troubleshooting](05-troubleshooting.md)
-6. [User guide](user-guide.md)
-7. [Administrator guide](admin-guide.md)
-8. [Architecture decisions](adr/README.md)
+4. [Email as a coding-agent harness channel](09-agent-harness.md)
+5. [Operations](04-operations.md)
+6. [Troubleshooting](05-troubleshooting.md)
+7. [User guide](user-guide.md)
+8. [Administrator guide](admin-guide.md)
+9. [Architecture decisions](adr/README.md)
 
 ## Repository layout
 
@@ -91,6 +92,7 @@ setup-mail.sh              the installer
 mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
 scripts/tailmail.py        minimal SMTP/IMAP client for agents
+scripts/install-tailmail-harness.sh  optional per-user CLI setup
 docs/                      these pages
 LICENSE                    MIT license for the project's code and docs
 THIRD-PARTY-NOTICES.md     upstream licenses and the distribution boundary

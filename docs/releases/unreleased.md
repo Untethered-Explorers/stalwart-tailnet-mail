@@ -22,7 +22,9 @@ MagicDNS name. Every listener binds to loopback and the `100.x` address.
 - Internal Stalwart accounts for humans, agents, and the administrator, with
   the full email address as the username.
 - One account and one app password per agent, plus `scripts/tailmail.py` for
-  send, inbox, and read.
+  sending, structured inbox reads, waiting for new messages, attachments, and
+  reply threading. The optional `install-tailmail-harness.sh` configures this
+  companion client without changing the server setup.
 - Weekly certificate renewal through `mail-cert-renew.timer`.
 - Installer modes for preflight, verification, diagnosis, resume, and
   reconfiguration after a tailnet IP change.
@@ -71,7 +73,7 @@ upgrades and backups.
 - Stalwart upgrades are manual, and the repository does not keep a rollback
   binary or pin a Stalwart version.
 - No metrics are wired up by default.
-- No tagged release and no CI or automated test suite.
+- No tagged release or CI workflow; current automated coverage is limited.
 - A custom `--domain` requires an externally supplied certificate, and the
   default Tailscale renewal timer does not cover it.
 - The Dovecot migration path depends on the external Vandelay tool and has not
@@ -79,13 +81,14 @@ upgrades and backups.
 
 ## Validation
 
-Checked in the repository on 2026-11-14:
+Checked in the repository on 2026-11-15:
 
-- `bash -n setup-mail.sh` passed.
-- `python3 -m py_compile scripts/tailmail.py` passed.
-- `./setup-mail.sh --help` printed the usage text.
-- `./make-dist.sh` built the tarball and printed its SHA-256.
-- The tarball contains `LICENSE` and `THIRD-PARTY-NOTICES.md`.
+- `python3 -m unittest discover -s tests -p 'test_*.py'` passed.
+- `python3 -m py_compile scripts/tailmail.py tests/test_tailmail.py` passed.
+- `bash -n scripts/install-tailmail-harness.sh` passed.
+- `bash tests/test-stalwart-tailnet-restart.sh` passed.
+- `./make-dist.sh` built the tarball and printed its SHA-256; the archive
+  contains the new harness guide, installer helper, and `tailmail.py`.
 - `git diff --check` reported no whitespace errors.
 
 Not run in this environment:
@@ -95,7 +98,8 @@ Not run in this environment:
 - Any SMTP/IMAP delivery test against a running Stalwart instance.
 - The Dovecot migration commands.
 
-There is no automated test suite or CI workflow.
+There is a small standard-library test suite and a shell regression test, but
+there is no CI workflow.
 
 ## Security and Privacy
 

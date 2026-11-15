@@ -48,6 +48,7 @@ index](docs/adr/README.md) for why the boundaries sit where they do.
 | Design and decisions | [Overview](docs/00-overview.md), [ADRs](docs/adr/README.md) |
 | Operations | [Operations](docs/04-operations.md), [Troubleshooting](docs/05-troubleshooting.md), [Security](docs/06-security.md) |
 | Accounts and agents | [Accounts and agents](docs/03-accounts-and-agents.md) |
+| Agent harness | [Email as a coding-agent harness channel](docs/09-agent-harness.md) |
 | Migration | [Migrating from Dovecot](docs/07-migrating-from-dovecot.md) |
 | Questions | [FAQ](docs/08-faq.md) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
@@ -80,8 +81,13 @@ python3 scripts/tailmail.py inbox --limit 10
 python3 scripts/tailmail.py read 42
 ```
 
-It reads `~/.config/tailmail/config`; the installer writes it for the account
-that ran `setup-mail.sh`, pointed at the first agent account.
+It reads `~/.config/tailmail/config`; `scripts/install-tailmail-harness.sh`
+installs it locally and prompts for a mailbox app password without changing
+the server setup. The CLI also supports JSON output, waiting for new mail,
+attachments, and reply threading. See
+[Email as a coding-agent harness channel](docs/09-agent-harness.md) for a
+step-by-step integration guide. The harness itself remains user-managed; the
+companion does not launch agents or install a background service.
 
 ## Tech Stack
 
@@ -126,6 +132,7 @@ setup-mail.sh              installer and phase runner
 mail-setup.conf.example    unattended configuration sample
 make-dist.sh               builds the hand-off tarball
 scripts/tailmail.py        minimal SMTP/IMAP client for agents
+scripts/install-tailmail-harness.sh  optional per-user CLI setup
 docs/                      topic guides, user and admin guides, ADRs, release notes
 docs/adr/                  architecture decision records
 docs/releases/             release notes
@@ -243,7 +250,9 @@ There is no `CONTRIBUTING.md` and no CI workflow. The current workflow is:
 
    ```bash
    bash -n setup-mail.sh
+   python3 -m unittest discover -s tests -p 'test_*.py'
    python3 -m py_compile scripts/tailmail.py
+   bash -n scripts/install-tailmail-harness.sh
    ./make-dist.sh
    git diff --check
    ```
@@ -253,14 +262,14 @@ There is no `CONTRIBUTING.md` and no CI workflow. The current workflow is:
 5. Add an ADR under `docs/adr/` for a durable design decision, and a
    `CHANGELOG.md` entry for a notable change.
 
-The maintainer reviews pull requests. There is no automated test suite, so
-describe the manual checks you ran.
+The maintainer reviews pull requests. There is no CI workflow and automated
+coverage is limited, so describe the manual checks you ran.
 
 ## What's Next
 
 These are known gaps, not shipped behavior:
 
-- No tagged release and no CI or automated test suite.
+- No tagged release or CI workflow; current automated coverage is limited.
 - Stalwart upgrades are manual; the installer does not pin a Stalwart version or
   keep a rollback binary.
 - No metrics are wired up. Stalwart can expose Prometheus metrics and tracing.
@@ -280,7 +289,8 @@ rollback. Open an issue if you want to work on one of these.
 
 The project's original source code and Markdown documentation are licensed under
 the [MIT License](LICENSE). That covers `setup-mail.sh`, `make-dist.sh`,
-`scripts/tailmail.py`, `mail-setup.conf.example`, and the Markdown docs.
+`scripts/tailmail.py`, `scripts/install-tailmail-harness.sh`, the tests,
+`mail-setup.conf.example`, and the Markdown docs.
 
 Third-party software is not covered by that license. Stalwart and
 `stalwart-cli` are AGPL-3.0-only OR SELv2; Bulwark Lite is AGPL-3.0-only with an

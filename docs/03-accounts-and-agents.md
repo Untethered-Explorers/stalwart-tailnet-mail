@@ -157,6 +157,10 @@ tailmail.py inbox --limit 20
 tailmail.py read 42
 ```
 
+For harness integration, install the optional companion CLI and follow the
+[email harness guide](09-agent-harness.md). It adds JSON output, wait,
+attachments, and reply threading without changing the mail-server setup.
+
 For push or structured search, Stalwart also exposes JMAP at
 `https://<host>/jmap/`. JMAP uses OAuth bearer tokens, not the app password;
 stick to SMTP/IMAP unless you have a reason.
