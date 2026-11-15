@@ -7,8 +7,7 @@
 #   ./make-dist.sh
 #
 # Produces dist/stalwart-tailnet-mail-<date>.tar.gz with the installer, docs,
-# sample config and the agent client. The tarball is what you give someone who
-# wants to run the same setup on their own tailnet.
+# sample config, agent client, and Tailscale boot helper.
 
 set -euo pipefail
 
@@ -29,7 +28,10 @@ cp "$HERE"/docs/*.md "$STAGE/docs/"
 cp "$HERE"/docs/adr/*.md "$STAGE/docs/adr/"
 cp "$HERE"/docs/releases/*.md "$STAGE/docs/releases/"
 cp "$HERE/scripts/tailmail.py" "$STAGE/scripts/"
-chmod +x "$STAGE/setup-mail.sh" "$STAGE/make-dist.sh"
+cp "$HERE"/scripts/*.sh "$STAGE/scripts/"
+mkdir -p "$STAGE/systemd"
+cp "$HERE"/systemd/*.service "$STAGE/systemd/"
+chmod +x "$STAGE/setup-mail.sh" "$STAGE/make-dist.sh" "$STAGE"/scripts/*.sh
 
 tar -czf "$OUT" -C "$HERE/dist" "$NAME"
 rm -rf "$STAGE"

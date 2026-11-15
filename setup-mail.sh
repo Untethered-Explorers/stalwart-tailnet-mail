@@ -27,6 +27,7 @@
 set -Eeuo pipefail
 
 PROG="$(basename "$0")"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE=""
 MODE="install"
 RESUME=0
@@ -658,6 +659,11 @@ PY
     mark_phase activate
 }
 
+install_tailnet_restart() {
+    log "Installing the Tailscale boot listener check"
+    "$SCRIPT_DIR/scripts/install-stalwart-tailnet-restart.sh"
+}
+
 configure_firewall() {
     phase_begin firewall "Firewall" || return 0
     if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: active"; then
@@ -746,6 +752,7 @@ verify() {
     local fails=0
 
     systemctl is-active --quiet stalwart.service && info "stalwart active" || { warn "stalwart inactive"; fails=$((fails+1)); }
+    systemctl is-enabled --quiet stalwart-tailnet-restart.service && info "Tailscale boot listener check enabled" || { warn "Tailscale boot listener check is not enabled"; fails=$((fails+1)); }
 
     local socks; socks="$(ss -ltnH | awk '{print $4}')"
     for p in 25 465 587 993 443; do
@@ -914,6 +921,7 @@ PY
             || die "recovery mode did not start; check journalctl -u stalwart"
         create_listeners
         activate
+        install_tailnet_restart
         exit 0
     fi
 
@@ -930,6 +938,7 @@ PY
     configure_firewall
     install_renewal
     write_agent_configs
+    install_tailnet_restart
 
     verify
     summary

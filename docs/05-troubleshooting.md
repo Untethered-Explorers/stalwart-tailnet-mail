@@ -27,7 +27,8 @@ sanitized config.
 | `501 You are not allowed to send from this address` | From is not an account address | send as the account, or add an alias |
 | `535 ... credentials invalid` | wrong password, or account password changed | verify in `/account`; use the app password in configs |
 | Client cannot connect from another node | ufw/ACL blocks the port | check `ufw status verbose` and tailnet grants |
-| `Connection refused` on 993/465 | Stalwart not listening on the tailnet IP | `ss -ltn`, check binds; re-run `--reconfigure` |
+| `Connection refused` on 993/465 | Stalwart not listening on the current tailnet IP | Check `ss -ltn`; restart Stalwart after Tailscale is up. Use `--reconfigure` only if the tailnet IP changed; see [operations](04-operations.md#reconfigure-after-a-tailnet-ip-change) |
+| Webmail works on the Pi but not over Tailscale after reboot | Stalwart is not listening on the current tailnet IP | Wait for `tailscale ip -4` to return an address, restart Stalwart, and verify its binds; see [operations](04-operations.md#after-a-pi-reboot) |
 | Certificate warning | certificate object not updated | run `/usr/local/sbin/mail-cert-renew`; check `/root/stalwart-api-key` |
 | Mail stops after ~90 days | renewal timer failing | `systemctl status mail-cert-renew`, journal |
 | Cron `sendmail: not found` | Stalwart has no sendmail binary | install `msmtp-mta` or call `tailmail.py` |

@@ -37,6 +37,7 @@ Webmail                Bulwark Lite mounted at /webmail/
 Activate               recovery off, services on the real ports
 Firewall               ufw rules for tailscale0
 Renewal                weekly timer
+Boot listener check    restarts Stalwart if Tailscale listeners are missing
 Verification           listeners, TLS, IMAP login, webmail HTTP
 ```
 
