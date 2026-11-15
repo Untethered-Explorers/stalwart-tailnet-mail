@@ -24,8 +24,8 @@ wants to run the same setup on another tailnet.
 - **MUST:** Include `setup-mail.sh`, `make-dist.sh`,
   `mail-setup.conf.example`, `READ-ME-FIRST.md`, `README.md`, `CHANGELOG.md`,
   `LICENSE`, `THIRD-PARTY-NOTICES.md`, the top-level `docs/*.md`,
-  `docs/adr/*.md`, `docs/releases/*.md`, and `scripts/tailmail.py` in the
-  tarball.
+  `docs/adr/*.md`, `docs/releases/*.md`, `scripts/tailmail.py`, and
+  `scripts/install-tailmail-harness.sh` in the tarball.
 - **MUST:** Use a date-stamped tarball name and print its SHA-256.
 - **MUST NOT:** Require a git checkout on the target host.
 - **SHOULD:** Rebuild the tarball after documentation changes.
@@ -37,7 +37,7 @@ wants to run the same setup on another tailnet.
 - **Expected:** The archive contains the installer, `make-dist.sh`, sample
   config, `READ-ME-FIRST.md`, `README.md`, `CHANGELOG.md`, `LICENSE`,
   `THIRD-PARTY-NOTICES.md`, the top-level docs, the ADRs, the release notes, and
-  `tailmail.py`, and the build prints a SHA-256.
+  both tailmail scripts, and the build prints a SHA-256.
 
 ## Context and Problem Statement
 

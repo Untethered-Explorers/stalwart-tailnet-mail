@@ -7,7 +7,7 @@
 #   ./make-dist.sh
 #
 # Produces dist/stalwart-tailnet-mail-<date>.tar.gz with the installer, docs,
-# sample config, agent client, and Tailscale boot helper.
+# sample config, agent client and harness setup helper, and Tailscale boot helper.
 
 set -euo pipefail
 
