@@ -25,6 +25,9 @@ MagicDNS name. Every listener binds to loopback and the `100.x` address.
   sending, structured inbox reads, waiting for new messages, attachments, and
   reply threading. The optional `install-tailmail-harness.sh` configures this
   companion client without changing the server setup.
+- Optional `scripts/tailmail_agent.py` watcher for coding-agent hosts. Its
+  interactive setup configures a project, harness, sender allowlist, and
+  per-user service; it does not change the mail-server installation.
 - Weekly certificate renewal through `mail-cert-renew.timer`.
 - Installer modes for preflight, verification, diagnosis, resume, and
   reconfiguration after a tailnet IP change.
@@ -78,17 +81,21 @@ upgrades and backups.
   default Tailscale renewal timer does not cover it.
 - The Dovecot migration path depends on the external Vandelay tool and has not
   been validated in this repository.
+- Watcher sender allowlisting uses message address metadata, not cryptographic
+  sender authentication. The watcher and coding agent run as the same local OS
+  user; this is not an isolation boundary.
 
 ## Validation
 
 Checked in the repository on 2026-11-15:
 
 - `python3 -m unittest discover -s tests -p 'test_*.py'` passed.
-- `python3 -m py_compile scripts/tailmail.py tests/test_tailmail.py` passed.
+- `python3 -m py_compile scripts/tailmail.py scripts/tailmail_agent.py tests/test_tailmail.py tests/test_tailmail_agent.py` passed.
 - `bash -n scripts/install-tailmail-harness.sh` passed.
 - `bash tests/test-stalwart-tailnet-restart.sh` passed.
 - `./make-dist.sh` built the tarball and printed its SHA-256; the archive
-  contains the new harness guide, installer helper, and `tailmail.py`.
+  contains `tailmail_agent.py`, its companion skill and project guidance, the
+  harness guide, the client installer, and `tailmail.py`.
 - `git diff --check` reported no whitespace errors.
 
 Not run in this environment:

@@ -8,13 +8,17 @@ applies_to:
   - "LICENSE"
   - "THIRD-PARTY-NOTICES.md"
   - "docs/**"
+  - "scripts/**"
+  - "companion-skills/**"
+  - "examples/**"
+  - "systemd/**"
 status: Accepted
 ---
 
 # ADR-0007: Distribute a date-stamped, self-contained tarball
 
 - **Deciders:** McFuzzySquirrel
-- **Date:** 2026-11-14
+- **Date:** 2026-11-15
 
 **Technical Story:** Hand the installer and its documentation to someone who
 wants to run the same setup on another tailnet.
@@ -24,8 +28,10 @@ wants to run the same setup on another tailnet.
 - **MUST:** Include `setup-mail.sh`, `make-dist.sh`,
   `mail-setup.conf.example`, `READ-ME-FIRST.md`, `README.md`, `CHANGELOG.md`,
   `LICENSE`, `THIRD-PARTY-NOTICES.md`, the top-level `docs/*.md`,
-  `docs/adr/*.md`, `docs/releases/*.md`, `scripts/tailmail.py`, and
-  `scripts/install-tailmail-harness.sh` in the tarball.
+  `docs/adr/*.md`, `docs/releases/*.md`, `scripts/tailmail.py`,
+  `scripts/tailmail_agent.py`, `scripts/*.sh`,
+  `companion-skills/tailmail-mail/SKILL.md`,
+  `examples/mail-harness/AGENTS.md`, and `systemd/*.service` in the tarball.
 - **MUST:** Use a date-stamped tarball name and print its SHA-256.
 - **MUST NOT:** Require a git checkout on the target host.
 - **SHOULD:** Rebuild the tarball after documentation changes.
@@ -33,11 +39,12 @@ wants to run the same setup on another tailnet.
 ## Verify
 
 - **Check:** `./make-dist.sh` and
-  `tar tzf dist/stalwart-tailnet-mail-*.tar.gz`
+  `tar tzf "dist/stalwart-tailnet-mail-$(date +%Y%m%d).tar.gz"`
 - **Expected:** The archive contains the installer, `make-dist.sh`, sample
   config, `READ-ME-FIRST.md`, `README.md`, `CHANGELOG.md`, `LICENSE`,
   `THIRD-PARTY-NOTICES.md`, the top-level docs, the ADRs, the release notes, and
-  both tailmail scripts, and the build prints a SHA-256.
+  both tailmail Python scripts, the shell helpers, companion skill, project
+  guidance, systemd unit, and the build prints a SHA-256.
 
 ## Context and Problem Statement
 

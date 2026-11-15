@@ -80,7 +80,10 @@ the agent is retired.
 
 Agents use SMTP/IMAP with their own account and app password. See
 [03-accounts-and-agents](03-accounts-and-agents.md) for the account model,
-`tailmail.py` configuration, and rotation guidance.
+`tailmail.py` configuration, and rotation guidance. For a coding-agent
+workflow, the optional watcher runs on the agent's computer rather than this
+mail server; see [09-agent-harness](09-agent-harness.md) for setup and trust
+limits.
 
 ## Offline and Reconnect Behavior
 

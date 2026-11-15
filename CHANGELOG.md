@@ -24,6 +24,9 @@ tagged release yet, so `[Unreleased]` describes the current tree.
 - Harness-facing JSON output, IMAP wait, attachment transfer, and reply
   threading in `tailmail.py`, plus a per-user installer/configurator and an
   email-to-agent integration guide.
+- Optional `tailmail_agent.py` watcher with interactive setup, sender
+  allowlisting, per-project profiles, and per-user services for coding-agent
+  hosts.
 - Focused standard-library tests for the harness-facing mail client behavior.
 - Installer modes for preflight, verification, diagnosis, resume, and
   reconfiguration after a tailnet IP change.

@@ -10,6 +10,11 @@ You own the host, the Tailscale node, the Stalwart service, the certificate, the
 accounts, and the backups. The installer handles the first install; it does not
 monitor or upgrade the service for you.
 
+The optional coding-agent mail watcher is installed per user on the coding-agent
+host, not on this mail server, and does not change the server installation. Its
+setup and security limits are documented in
+[09-agent-harness](09-agent-harness.md).
+
 Stalwart handles SMTP, IMAP4, JMAP, and HTTPS. Bulwark Lite is a Stalwart
 `Application` at `/webmail/`. All listeners bind to loopback and the `100.x`
 address. The certificate is a Tailscale-issued certificate for the MagicDNS

@@ -13,7 +13,7 @@ records are added or superseded.*
 | [ADR-0004](0004-bootstrap-api-in-recovery-mode.md) | [Configure Stalwart through the Bootstrap API in recovery mode](0004-bootstrap-api-in-recovery-mode.md) | Accepted | 2026-11-14 |
 | [ADR-0005](0005-internal-accounts-and-app-passwords.md) | [Use internal accounts, full-address usernames, and per-agent app passwords](0005-internal-accounts-and-app-passwords.md) | Accepted | 2026-11-14 |
 | [ADR-0006](0006-bulwark-lite-as-application.md) | [Serve Bulwark Lite as a Stalwart Application](0006-bulwark-lite-as-application.md) | Accepted | 2026-11-14 |
-| [ADR-0007](0007-date-stamped-tarball.md) | [Distribute a date-stamped, self-contained tarball](0007-date-stamped-tarball.md) | Accepted | 2026-11-14 |
+| [ADR-0007](0007-date-stamped-tarball.md) | [Distribute a date-stamped, self-contained tarball](0007-date-stamped-tarball.md) | Accepted | 2026-11-15 |
 
 ## Rules
 
